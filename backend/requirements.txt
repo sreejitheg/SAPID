@@ -3,3 +3,6 @@ uvicorn
 sqlmodel
 alembic
 psycopg2-binary
+sqlmodel
+alembic
+psycopg2-binary
