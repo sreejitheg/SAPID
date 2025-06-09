@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import os
@@ -87,3 +88,4 @@ class RAG:
         ]
         answer = self.llm.chat(messages)
         return answer, sources
+
