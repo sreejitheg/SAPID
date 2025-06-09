@@ -82,6 +82,26 @@ services:
     profiles:
       - build
 
+
+  whisper:
+    build:
+      context: ./docker/voice
+      dockerfile: Dockerfile.whisper
+    ports:
+      - "9000:9000"
+    profiles:
+      - voice
+
+  tts:
+    build:
+      context: ./docker/voice
+      dockerfile: Dockerfile.tts
+    ports:
+      - "9001:9001"
+    profiles:
+      - voice
+
+
 volumes:
   postgres_data: {}
   chroma_data: {}

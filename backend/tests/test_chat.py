@@ -55,7 +55,6 @@ async def test_chat_flow(tmp_path, monkeypatch):
 
     pdf_path = 'frontend/public/demo/financial-report.pdf'
 
-
     transport = ASGITransport(app=main.app)
     async with AsyncClient(transport=transport, base_url='http://test') as client:
 
