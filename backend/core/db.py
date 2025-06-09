@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import os
@@ -35,3 +36,8 @@ class Message(SQLModel, table=True):
 def get_session() -> Iterator[Session]:
     with Session(engine) as session:
         yield session
+        
+class Database:
+    def connect(self) -> None:
+        pass
+
