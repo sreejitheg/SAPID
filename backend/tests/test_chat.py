@@ -1,22 +1,42 @@
 import os
-import importlib
-from httpx import AsyncClient
+
+from pathlib import Path
+import sys
+from httpx import AsyncClient, ASGITransport
 from sqlmodel import select
 import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 
 
 @pytest.mark.asyncio
 async def test_chat_flow(tmp_path, monkeypatch):
     os.environ['POSTGRES_URL'] = f"sqlite:///{tmp_path}/test.db"
 
+
+    import backend.core.rag as rag_module
+
+    class DummyCollection:
+        def add(self, *args, **kwargs):
+            pass
+
+        def query(self, *args, **kwargs):
+            return {"documents": [[]], "metadatas": [[]]}
+
+    class DummyClient:
+        def get_or_create_collection(self, name):
+            return DummyCollection()
+
+    monkeypatch.setattr(rag_module, "chromadb", type("x", (), {"HttpClient": lambda *a, **k: DummyClient()})())
+
     import backend.core.db as db
-    db = importlib.reload(db)
+    import backend.api as backend_api
     import backend.api.chat as chat
-    chat = importlib.reload(chat)
     import backend.api.upload as upload
-    upload = importlib.reload(upload)
+    sys.modules['api'] = backend_api
     import backend.main as main
-    main = importlib.reload(main)
+
 
     db.SQLModel.metadata.create_all(db.engine)
 
@@ -26,13 +46,19 @@ async def test_chat_flow(tmp_path, monkeypatch):
     ))
     monkeypatch.setattr(chat.llm, 'classify_intent', lambda text: ('general', 0.7))
     collect_calls = []
-    monkeypatch.setattr(chat.incident_api, 'collect', lambda *a, **kw: collect_calls.append(a))
+
+    import backend.external.incident_api as incident_mod
+    monkeypatch.setattr(incident_mod.IncidentAPI, 'collect', lambda self, *a, **kw: collect_calls.append(a))
+
 
     session = db.get_or_create_session(None)
 
     pdf_path = 'frontend/public/demo/financial-report.pdf'
 
-    async with AsyncClient(app=main.app, base_url='http://test') as client:
+
+    transport = ASGITransport(app=main.app)
+    async with AsyncClient(transport=transport, base_url='http://test') as client:
+
         with open(pdf_path, 'rb') as fh:
             resp = await client.post(f'/upload/temp/{session.id}', files={'file': ('test.pdf', fh, 'application/pdf')})
             assert resp.status_code == 200
