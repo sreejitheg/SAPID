@@ -57,7 +57,3 @@ class LLM:
         except Exception:
             return response.strip(), 0.0
 
-class LLM:
-    def generate(self, prompt: str) -> str:
-        return f"Generated response for: {prompt}"
-
