@@ -6,7 +6,9 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import Iterator, Optional
 
-from sqlmodel import Field, SQLModel, Session, create_engine
+
+from sqlmodel import Field, SQLModel, Session, create_engine, delete
+
 
 DATABASE_URL = os.getenv("POSTGRES_URL", "sqlite:///./local.db")
 
@@ -51,6 +53,25 @@ def get_or_create_session(session_id: Optional[int]) -> ChatSession:
         session.commit()
         session.refresh(new_session)
         return new_session
+
+
+def create_session() -> ChatSession:
+    """Explicitly create a new chat session."""
+    with get_session() as session:
+        new_session = ChatSession()
+        session.add(new_session)
+        session.commit()
+        session.refresh(new_session)
+        return new_session
+
+
+def delete_session(session_id: int) -> None:
+    """Delete a chat session and its messages."""
+    with get_session() as session:
+        session.exec(delete(Message).where(Message.session_id == session_id))
+        session.exec(delete(ChatSession).where(ChatSession.id == session_id))
+        session.commit()
+
 
 
 def add_message(

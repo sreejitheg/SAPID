@@ -37,7 +37,6 @@ async def test_chat_flow(tmp_path, monkeypatch):
     sys.modules['api'] = backend_api
     import backend.main as main
 
-
     db.SQLModel.metadata.create_all(db.engine)
 
     monkeypatch.setattr(upload.rag, 'embed_pdf', lambda *args, **kwargs: None)
