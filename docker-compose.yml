@@ -23,7 +23,7 @@ services:
     volumes:
       - chroma_data:/chroma
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--spider", "--tries=1", "http://localhost:8000/api/v1/heartbeat"]
+      test: ["CMD-SHELL", "bash -c 'timeout 1s cat < /dev/tcp/127.0.0.1/8000; if [ $? -eq 124 ]; then exit 0; else exit 1; fi'"]
       interval: 30s
       timeout: 5s
       retries: 5
