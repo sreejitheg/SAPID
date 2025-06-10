@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import os
@@ -5,7 +6,9 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import Iterator, Optional
 
+
 from sqlmodel import Field, SQLModel, Session, create_engine, delete, select
+
 
 DATABASE_URL = os.getenv("POSTGRES_URL", "sqlite:///./local.db")
 
@@ -17,6 +20,7 @@ class ChatSession(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+
 
 
 class Conversation(SQLModel, table=True):
@@ -32,6 +36,7 @@ class ChatMessage(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     conversation_id: int = Field(foreign_key="conversation.id")
+
     sender: str
     content: str
     llm_intent: Optional[str] = None
@@ -73,12 +78,15 @@ def create_session() -> ChatSession:
 def delete_session(session_id: int) -> None:
     """Delete a chat session and its messages."""
     with get_session() as session:
+
         conv_ids = [c.id for c in session.exec(select(Conversation.id).where(Conversation.session_id == session_id))]
         if conv_ids:
             session.exec(delete(ChatMessage).where(ChatMessage.conversation_id.in_(conv_ids)))
             session.exec(delete(Conversation).where(Conversation.id.in_(conv_ids)))
+
         session.exec(delete(ChatSession).where(ChatSession.id == session_id))
         session.commit()
+
 
 
 def create_conversation(session_id: int) -> Conversation:
@@ -119,15 +127,18 @@ def get_messages(conversation_id: int) -> list[ChatMessage]:
 
 def add_message(
     conversation_id: int,
+
     sender: str,
     content: str,
     llm_intent: Optional[str] = None,
     confidence: Optional[float] = None,
+
 ) -> ChatMessage:
     """Persist a chat message."""
     with get_session() as session:
         msg = ChatMessage(
             conversation_id=conversation_id,
+
             sender=sender,
             content=content,
             llm_intent=llm_intent,
@@ -137,3 +148,4 @@ def add_message(
         session.commit()
         session.refresh(msg)
         return msg
+
