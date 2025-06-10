@@ -82,6 +82,7 @@ services:
     profiles:
       - build
 
+
   whisper:
     build:
       context: ./docker/voice
@@ -99,6 +100,7 @@ services:
       - "9001:9001"
     profiles:
       - voice
+
 
 volumes:
   postgres_data: {}

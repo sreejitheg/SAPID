@@ -36,3 +36,4 @@ async def upload_temp(session_id: int, file: UploadFile) -> dict:
     collection = f"temp_{session_id}"
     rag.embed_pdf(path, collection, is_temp=True)
     return {"status": "ok", "collection": collection}
+
