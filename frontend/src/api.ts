@@ -11,24 +11,30 @@ export interface ChatResponse {
   sources: Source[];
 }
 
-const baseURL = import.meta.env.VITE_API_BASE || '/api';
+const BASE = import.meta.env.VITE_API_BASE || '/api';
 
-export async function chat(sessionId: string, text: string): Promise<ChatResponse> {
-  const res = await fetch(`${baseURL}/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: sessionId, user: 'user', message: text }),
+export function chat(sessionId: string, text: string, onMessage: (data: any) => void): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const es = new EventSource(`${BASE}/chat?session_id=${sessionId}&message=${encodeURIComponent(text)}&user=user`);
+    es.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      onMessage(data);
+      if (data.type === 'done') {
+        es.close();
+        resolve();
+      }
+    };
+    es.onerror = (err) => {
+      es.close();
+      reject(err);
+    };
   });
-  if (!res.ok) {
-    throw new Error('Failed to send chat message');
-  }
-  return res.json();
 }
 
 export async function uploadTemp(sessionId: string, f: File): Promise<void> {
   const form = new FormData();
   form.append('file', f);
-  const res = await fetch(`${baseURL}/upload/temp/${sessionId}`, {
+  const res = await fetch(`${BASE}/upload/temp/${sessionId}`, {
     method: 'POST',
     body: form,
   });
@@ -40,7 +46,7 @@ export async function uploadTemp(sessionId: string, f: File): Promise<void> {
 export async function uploadGlobal(f: File): Promise<void> {
   const form = new FormData();
   form.append('file', f);
-  const res = await fetch(`${baseURL}/upload/global`, {
+  const res = await fetch(`${BASE}/upload/global`, {
     method: 'POST',
     body: form,
   });

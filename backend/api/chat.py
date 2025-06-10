@@ -40,9 +40,7 @@ def render_sources(sources: list[dict]) -> str:
     return "\n".join(links)
 
 
-@router.post("/")
-
-async def chat_endpoint(payload: ChatIn) -> EventSourceResponse:
+async def stream_chat(payload: ChatIn):
     session = db.get_or_create_session(payload.session_id)
 
     conversation = None
@@ -59,20 +57,27 @@ async def chat_endpoint(payload: ChatIn) -> EventSourceResponse:
     if sources:
         full_answer += "\n" + render_sources(sources)
 
-
     db.add_message(
         conversation_id=conversation.id,
-
         sender=payload.user,
         content=payload.message,
         llm_intent=intent,
         confidence=conf,
     )
 
+    yield {"type": "content", "content": full_answer}
+    for src in sources:
+        doc_id = src.get("doc_id") if isinstance(src, dict) else getattr(src, "doc_id", None)
+        if doc_id:
+            yield {"type": "document_reference", "document_id": doc_id}
+    yield {"type": "done"}
 
+
+@router.post("/")
+async def chat_endpoint(payload: ChatIn) -> EventSourceResponse:
     async def event_generator():
-        yield json.dumps({"type": "content", "content": full_answer})
-        yield json.dumps({"type": "done"})
+        async for chunk in stream_chat(payload):
+            yield json.dumps(chunk)
 
     return EventSourceResponse(event_generator())
 
