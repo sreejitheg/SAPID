@@ -10,7 +10,7 @@ import chromadb
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
-from .llm import LLM
+from core.llm import LLM
 
 
 class RAG:
