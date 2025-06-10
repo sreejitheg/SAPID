@@ -20,7 +20,7 @@ npm run dev
 
 ## Backend Integration
 
-The application expects a backend server running on `localhost:8000` with the following API endpoints. See `src/api/endpoints.md` for detailed API specifications.
+The application expects a backend server accessible at the `/api` path (for example via Nginx proxying to `localhost:8001`). See `src/api/endpoints.md` for detailed API specifications.
 
 ## Demo Mode
 
