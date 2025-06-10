@@ -14,6 +14,39 @@ class LLM:
         self.chat_model = chat_model
         self.embed_model = embed_model
 
+        # Ensure the required models are available on the Ollama server. If a
+        # model is missing, attempt to pull it using the API so the first
+        # request doesn't fail because of a missing model.
+        for model in {self.chat_model, self.embed_model}:
+            self._ensure_model(model)
+
+    def _ensure_model(self, model: str) -> None:
+        """Verify *model* exists on the server and pull it if missing."""
+        try:
+            resp = requests.get(f"{self.base_url}/api/tags")
+            resp.raise_for_status()
+            models = [m.get("name") for m in resp.json().get("models", [])]
+            if model in models:
+                return
+        except Exception:
+            # If we can't check, just skip pulling to avoid raising during init
+            return
+
+        try:
+            # Pull the model; the API streams progress line by line which we
+            # simply consume and ignore.
+            resp = requests.post(
+                f"{self.base_url}/api/pull",
+                json={"name": model},
+                stream=True,
+            )
+            resp.raise_for_status()
+            for _ in resp.iter_lines():
+                pass
+        except Exception:
+            # Swallow errors so initialization doesn't fail if the pull fails
+            pass
+
     def embed(self, text: str) -> List[float]:
         """Return the embedding vector for *text* using the embed model."""
         url = f"{self.base_url}/api/embeddings"
