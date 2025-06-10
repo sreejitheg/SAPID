@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from fastapi import APIRouter
 
-from ..external.email_service import EmailService
+from external.email_service import EmailService
 
 router = APIRouter()
 email_service = EmailService()
