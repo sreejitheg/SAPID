@@ -2,7 +2,7 @@ import json
 from pydantic import BaseModel
 from fastapi import APIRouter
 
-from ..core import db
+from core import db
 
 router = APIRouter()
 

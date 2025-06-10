@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 async def test_endpoints(tmp_path, monkeypatch):
     os.environ['POSTGRES_URL'] = f"sqlite:///{tmp_path}/db.db"
 
-    import backend.core.rag as rag_module
+    import core.rag as rag_module
 
     class DummyCollection:
         def add(self, *args, **kwargs):
@@ -25,7 +25,7 @@ async def test_endpoints(tmp_path, monkeypatch):
 
     monkeypatch.setattr(rag_module, "chromadb", type("x", (), {"HttpClient": lambda *a, **k: DummyClient()})())
 
-    import backend.core.db as db
+    import core.db as db
     import backend.api as backend_api
     import backend.api.chat as chat
     import backend.api.upload as upload

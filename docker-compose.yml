@@ -3,7 +3,6 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    entrypoint: ["/bin/bash","/docker-entrypoint-initdb.d/check_pg_version.sh"]
     environment:
       POSTGRES_USER: sapid
       POSTGRES_PASSWORD: sapid

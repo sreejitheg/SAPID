@@ -17,7 +17,7 @@ async def test_chat_flow(tmp_path, monkeypatch):
     os.environ['POSTGRES_URL'] = f"sqlite:///{tmp_path}/test.db"
 
 
-    import backend.core.rag as rag_module
+    import core.rag as rag_module
 
     class DummyCollection:
         def add(self, *args, **kwargs):
@@ -32,7 +32,7 @@ async def test_chat_flow(tmp_path, monkeypatch):
 
     monkeypatch.setattr(rag_module, "chromadb", type("x", (), {"HttpClient": lambda *a, **k: DummyClient()})())
 
-    import backend.core.db as db
+    import core.db as db
     import backend.api as backend_api
     import backend.api.chat as chat
     import backend.api.upload as upload
