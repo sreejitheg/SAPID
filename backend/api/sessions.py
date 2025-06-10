@@ -1,7 +1,7 @@
 from datetime import datetime
 from fastapi import APIRouter, Response
 
-from ..core import db
+from core import db
 
 router = APIRouter()
 

@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from core.llm import LLM
 from core.rag import RAG
-from ..core import db
+from core import db
 from ..external.incident_api import IncidentAPI
 
 ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
