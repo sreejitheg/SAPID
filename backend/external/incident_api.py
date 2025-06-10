@@ -1,4 +1,5 @@
 class IncidentAPI:
+
     """Stub for interacting with an external incident management API."""
 
     def get_incidents(self):
@@ -8,3 +9,4 @@ class IncidentAPI:
         """Send incident-related text to the external system."""
         # This is a stub for future integration.
         return None
+

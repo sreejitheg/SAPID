@@ -1,17 +1,21 @@
 import os
+
 from pathlib import Path
 import sys
 from httpx import AsyncClient, ASGITransport
 import json
+
 from sqlmodel import select
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 
+
 @pytest.mark.asyncio
 async def test_chat_flow(tmp_path, monkeypatch):
     os.environ['POSTGRES_URL'] = f"sqlite:///{tmp_path}/test.db"
+
 
     import backend.core.rag as rag_module
 
@@ -43,16 +47,19 @@ async def test_chat_flow(tmp_path, monkeypatch):
     ))
     monkeypatch.setattr(chat.llm, 'classify_intent', lambda text: ('general', 0.7))
     collect_calls = []
+
     import backend.external.incident_api as incident_mod
     monkeypatch.setattr(incident_mod.IncidentAPI, 'collect', lambda self, *a, **kw: collect_calls.append(a))
 
     session = db.get_or_create_session(None)
     conv = db.create_conversation(session.id)
 
+
     pdf_path = 'frontend/public/demo/financial-report.pdf'
 
     transport = ASGITransport(app=main.app)
     async with AsyncClient(transport=transport, base_url='http://test') as client:
+
         with open(pdf_path, 'rb') as fh:
             resp = await client.post(f'/upload/temp/{session.id}', files={'file': ('test.pdf', fh, 'application/pdf')})
             assert resp.status_code == 200
@@ -62,6 +69,7 @@ async def test_chat_flow(tmp_path, monkeypatch):
             'user': 'alice',
             'message': 'hello'
         }
+
         async with client.stream("POST", "/chat/", json=payload) as resp:
             assert resp.status_code == 200
             events = []
@@ -75,5 +83,6 @@ async def test_chat_flow(tmp_path, monkeypatch):
 
     with db.get_session() as s:
         msgs = s.exec(select(db.ChatMessage)).all()
+
         assert len(msgs) == 1
         assert msgs[0].content == 'hello'
