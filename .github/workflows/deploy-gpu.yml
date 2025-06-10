@@ -28,8 +28,8 @@ jobs:
         run: |
           ssh ${{ secrets.TARGET_USER }}@${{ secrets.TARGET_HOST }} <<'EOF'
             cd ~/sapid
-            docker compose pull
-            docker compose up -d --build
+            docker compose pull frontend
+            docker compose up -d --build frontend
           EOF
 
       # 4) Wait for backend health
