@@ -56,4 +56,3 @@ class LLM:
             return result.get("intent", ""), float(result.get("confidence", 0))
         except Exception:
             return response.strip(), 0.0
-
