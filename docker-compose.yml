@@ -23,8 +23,8 @@ services:
     volumes:
       - chroma_data:/chroma
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://chroma:8000/heartbeat"]
-      interval: 10s
+      test: ["CMD", "wget", "--no-verbose", "--spider", "--tries=1", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
       timeout: 5s
       retries: 5
 
@@ -43,7 +43,7 @@ services:
               count: all
               capabilities: [gpu]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD", "ollama", "list"]
       interval: 30s
       timeout: 5s
       retries: 3
