@@ -125,7 +125,7 @@ class ApiService {
       throw new Error('No active session');
     }
 
-    const response = await fetch(`${API_BASE_URL}/documents?session_id=${this.sessionId}`);
+    const response = await fetch(`${API_BASE_URL}/upload/documents?session_id=${this.sessionId}`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch documents');
@@ -135,7 +135,7 @@ class ApiService {
   }
 
   async getDocument(docId: string): Promise<Document> {
-    const response = await fetch(`${API_BASE_URL}/documents/${docId}`);
+    const response = await fetch(`${API_BASE_URL}/upload/documents/${docId}`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch document');
@@ -145,7 +145,7 @@ class ApiService {
   }
 
   async deleteDocument(docId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/documents/${docId}`, {
+    const response = await fetch(`${API_BASE_URL}/upload/documents/${docId}`, {
       method: 'DELETE',
     });
 
