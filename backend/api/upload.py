@@ -39,7 +39,6 @@ async def upload(file: UploadFile, type: str, session_id: int | None = None) -> 
     rag.embed_pdf(path, collection, is_temp, doc_id=str(doc.id))
     return {"id": doc.id, "collection": collection}
 
-
 @router.post("/global")
 async def upload_global(file: UploadFile) -> dict:
     """Upload a PDF to the global knowledge base."""

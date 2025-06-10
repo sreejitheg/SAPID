@@ -1,7 +1,7 @@
 import os
 from fastapi import APIRouter
 
-from fastapi.responses import EventSourceResponse
+from sse_starlette.sse import EventSourceResponse
 import json
 
 from pydantic import BaseModel
