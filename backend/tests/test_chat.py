@@ -1,4 +1,5 @@
 import os
+import json
 
 from pathlib import Path
 import sys
@@ -37,10 +38,15 @@ async def test_chat_flow(tmp_path, monkeypatch):
     sys.modules['api'] = backend_api
     import backend.main as main
 
-    db.SQLModel.metadata.create_all(db.engine)
+        async with client.stream("POST", "/chat/", json=payload) as resp:
+            assert resp.status_code == 200
+            events = []
+            async for line in resp.aiter_lines():
+                if line.startswith("data:"):
+                    events.append(json.loads(line[5:].strip()))
 
-    monkeypatch.setattr(upload.rag, 'embed_pdf', lambda *args, **kwargs: None)
-    monkeypatch.setattr(chat.rag, 'query', lambda *args, **kwargs: (
+            answer = "".join(e["content"] for e in events if e.get("type") == "content")
+    assert '(#/pdf/' in answer
         'the answer', [{'doc_id': 'doc1', 'page': 0, 'chunk_id': 1}]
     ))
     monkeypatch.setattr(chat.llm, 'classify_intent', lambda text: ('general', 0.7))

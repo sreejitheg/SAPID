@@ -1,5 +1,7 @@
 import os
 from fastapi import APIRouter
+from fastapi.responses import EventSourceResponse
+import json
 from pydantic import BaseModel
 
 from ..core.llm import LLM
@@ -22,8 +24,14 @@ router = APIRouter()
 class ChatIn(BaseModel):
     session_id: int | None = None
 
-    conversation_id: int | None = None
+async def chat_endpoint(payload: ChatIn) -> EventSourceResponse:
 
+
+    async def event_generator():
+        yield json.dumps({"type": "content", "content": full_answer})
+        yield json.dumps({"type": "done"})
+
+    return EventSourceResponse(event_generator())
     user: str
     message: str
 

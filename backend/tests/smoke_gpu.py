@@ -1,6 +1,7 @@
 from io import BytesIO
 
 import requests
+import json
 from pypdf import PdfWriter
 from sqlmodel import select
 
@@ -21,10 +22,15 @@ def test_smoke_gpu():
     assert resp.status_code == 200
 
 
-    sess_resp = requests.post("http://localhost:8001/sessions")
-    assert sess_resp.status_code == 200
-    session_id = sess_resp.json()["id"]
-
+    resp = requests.post("http://localhost:8001/chat/", json=payload, stream=True)
+    events = []
+    for line in resp.iter_lines():
+        if line.startswith(b"data:"):
+            events.append(json.loads(line[5:].decode().strip()))
+    answer = "".join(
+        e.get("content", "") for e in events if e.get("type") == "content"
+    )
+    assert "(#/pdf/" in answer
     payload = {
         "session_id": session_id,
         "user": "tester",
