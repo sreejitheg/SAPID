@@ -6,8 +6,8 @@ import json
 
 from pydantic import BaseModel
 
-from ..core.llm import LLM
-from ..core.rag import RAG
+from core.llm import LLM
+from core.rag import RAG
 from ..core import db
 from ..external.incident_api import IncidentAPI
 
