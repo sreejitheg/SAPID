@@ -4,10 +4,9 @@ import { AppSettings } from '../../types';
 
 interface HeaderProps {
   settings: AppSettings;
-  isMobile: boolean;
 }
 
-export function Header({ settings, isMobile }: HeaderProps) {
+export function Header({ settings }: HeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between">

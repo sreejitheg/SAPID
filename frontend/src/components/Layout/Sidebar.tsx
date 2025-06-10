@@ -1,6 +1,6 @@
 import React from 'react';
 import { MessageSquare, FileText, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
-import { SidebarTab, AppSettings } from '../../types';
+import { SidebarTab, AppSettings, Document, Conversation } from '../../types';
 import { ConversationsTab } from './ConversationsTab';
 import { DocumentsTab } from './DocumentsTab';
 import { SettingsTab } from './SettingsTab';
@@ -9,14 +9,14 @@ interface SidebarProps {
   activeTab: SidebarTab;
   onTabChange: (tab: SidebarTab) => void;
   onNewConversation: () => void;
-  conversations: any[];
-  documents: any[];
+  conversations: Conversation[];
+  documents: Document[];
   settings: AppSettings;
   onConversationSelect: (id: string) => void;
   onConversationDelete: (id: string) => void;
   onDocumentUpload: (file: File, type: 'permanent' | 'temporary') => Promise<void>;
   onDocumentDelete: (id: string) => void;
-  onSettingsChange: (settings: any) => void;
+  onSettingsChange: (settings: AppSettings) => void;
   isUploading: boolean;
   activeConversationId?: string;
   isMobile?: boolean;

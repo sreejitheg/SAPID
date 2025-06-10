@@ -46,7 +46,8 @@ export const demoMessages: Message[] = [
   },
 ];
 
-export async function* demoStreamResponse(message: string): AsyncGenerator<string, void, unknown> {
+export async function* demoStreamResponse(_message: string): AsyncGenerator<string, void, unknown> {
+  void _message;
   const responses = [
     "I'll help you with that. ",
     "Let me analyze the information provided. ",

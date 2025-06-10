@@ -5,7 +5,7 @@ import { ChatInterface } from './components/Chat/ChatInterface';
 import { MobileLayout } from './components/Mobile/MobileLayout';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { createUnifiedService } from './demo/demoService';
-import { Message, Document, AppSettings, Conversation, SidebarTab } from './types';
+import { Message, Document, AppSettings, Conversation, SidebarTab, DynamicForm } from './types';
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -177,7 +177,7 @@ function App() {
     try {
       const service = createUnifiedService(settings.demoMode);
       let streamContent = '';
-      let forms: any[] = [];
+      const forms: DynamicForm[] = [];
       
       const streamGenerator = service.streamChat(content, activeConversationId, settings.webSearchEnabled);
 
@@ -299,7 +299,6 @@ function App() {
     <div className={`flex flex-col h-screen ${settings.darkMode ? 'dark' : ''} bg-gray-50 dark:bg-gray-900`}>
       <Header
         settings={settings}
-        isMobile={isMobile}
       />
       
       <div className="flex flex-1 overflow-hidden">

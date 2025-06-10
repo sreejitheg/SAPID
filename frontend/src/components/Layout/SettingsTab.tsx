@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Monitor, Moon, Sun, Globe, TestTube, Activity, WifiOff, RefreshCw, Shield, User } from 'lucide-react';
+import { Moon, Sun, Globe, TestTube, Activity, WifiOff, RefreshCw, Shield, User } from 'lucide-react';
 import { AppSettings } from '../../types';
 
 interface SettingsTabProps {
@@ -17,6 +17,7 @@ export function SettingsTab({ settings, onSettingsChange }: SettingsTabProps) {
       const healthy = response.ok;
       onSettingsChange({ ...settings, backendHealthy: healthy });
     } catch (error) {
+      console.error('Backend health check failed:', error);
       onSettingsChange({ ...settings, backendHealthy: false });
     } finally {
       setIsCheckingHealth(false);
