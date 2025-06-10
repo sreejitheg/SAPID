@@ -5,8 +5,8 @@ import tempfile
 from fastapi import APIRouter, UploadFile, HTTPException, Response
 from fastapi.responses import FileResponse
 
-from ..core.llm import LLM
-from ..core.rag import RAG
+from core.llm import LLM
+from core.rag import RAG
 from ..core import db
 
 
