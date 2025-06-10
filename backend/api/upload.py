@@ -3,6 +3,7 @@ import tempfile
 
 
 from fastapi import APIRouter, UploadFile, HTTPException, Response
+from fastapi.responses import FileResponse
 
 from ..core.llm import LLM
 from ..core.rag import RAG
@@ -37,7 +38,12 @@ async def upload(file: UploadFile, type: str, session_id: int | None = None) -> 
 
     doc = db.add_document(file.filename, type, len(data), session_id)
     rag.embed_pdf(path, collection, is_temp, doc_id=str(doc.id))
-    return {"id": doc.id, "collection": collection}
+
+    os.makedirs("./storage", exist_ok=True)
+    storage_path = f"./storage/{doc.id}.pdf"
+    os.replace(path, storage_path)
+
+    return {"id": doc.id, "collection": collection, "url": f"/upload/documents/{doc.id}/view"}
 
 @router.post("/global")
 async def upload_global(file: UploadFile) -> dict:
@@ -92,6 +98,15 @@ def get_doc(doc_id: int):
         "uploaded_at": doc.uploaded_at,
         "session_id": doc.session_id,
     }
+
+
+@router.get("/documents/{doc_id}/view", response_class=FileResponse)
+def view_pdf(doc_id: int):
+    doc = db.get_document(doc_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Not found")
+    path = f"./storage/{doc_id}.pdf"
+    return FileResponse(path, media_type="application/pdf", filename=doc.name)
 
 
 @router.delete("/documents/{doc_id}", status_code=204)
