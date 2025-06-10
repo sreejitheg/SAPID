@@ -56,6 +56,16 @@ class Document(SQLModel, table=True):
     session_id: Optional[int] = Field(default=None, foreign_key="chat_session.id")
 
 
+
+class FormSubmission(SQLModel, table=True):
+    __tablename__ = "form_submission"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    form_id: str
+    session_id: int = Field(foreign_key="chat_session.id")
+    data: str
+    submitted_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+
 @contextmanager
 def get_session() -> Iterator[Session]:
     with Session(engine) as session:
@@ -189,4 +199,15 @@ def delete_document(doc_id: int) -> None:
     with get_session() as session:
         session.exec(delete(Document).where(Document.id == doc_id))
         session.commit()
+
+
+
+def add_form_submission(form_id: str, session_id: int, data: str) -> FormSubmission:
+    """Store a submitted form."""
+    with get_session() as session:
+        sub = FormSubmission(form_id=form_id, session_id=session_id, data=data)
+        session.add(sub)
+        session.commit()
+        session.refresh(sub)
+        return sub
 
