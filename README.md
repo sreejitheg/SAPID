@@ -11,6 +11,13 @@
    uvicorn backend.main:app --reload --port 8001
    ```
 
+The backend connects to an Ollama server defined by `OLLAMA_URL` (defaults to
+`http://localhost:11434`). When starting up, it now checks that the models
+specified by `OLLAMA_CHAT_MODEL` and `OLLAMA_EMBED_MODEL` are present. If a
+model is missing, it will automatically pull it from the Ollama registry. For
+example, setting `OLLAMA_CHAT_MODEL=mistral:latest` will trigger a pull of that
+model on first run if it's not already installed.
+
 ## Available API Endpoints
 
 - `GET /health` – Application status
