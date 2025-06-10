@@ -76,11 +76,9 @@ services:
   frontend-build:
     image: node:20-alpine
     working_dir: /workspace
-    volumes:
-      - ./frontend:/workspace
-    command: ["sh", "-c", "npm ci && npm run build"]
-    profiles:
-      - build
+    volumes: [ "./frontend:/workspace" ]
+    command: ["sh","-c","npm ci && npm run build"]
+    profiles: [ "build" ]
 
 
   whisper:
