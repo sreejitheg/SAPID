@@ -1,4 +1,4 @@
-import { Document, Message, DynamicForm, Session, Conversation } from '../types';
+import { Document, Message, Session, Conversation, StreamChunk } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000';
 
@@ -9,7 +9,7 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/health`);
       return response.ok;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -154,7 +154,7 @@ class ApiService {
     }
   }
 
-  async *streamChat(message: string, conversationId: string, webSearchEnabled: boolean): AsyncGenerator<any, void, unknown> {
+  async *streamChat(message: string, conversationId: string, webSearchEnabled: boolean): AsyncGenerator<StreamChunk, void, unknown> {
     if (!this.sessionId) {
       throw new Error('No active session');
     }
@@ -197,9 +197,9 @@ class ApiService {
             if (data === '[DONE]') return;
             
             try {
-              const parsed = JSON.parse(data);
+              const parsed: StreamChunk = JSON.parse(data);
               yield parsed;
-            } catch (e) {
+            } catch {
               // Skip invalid JSON
             }
           }
@@ -210,7 +210,7 @@ class ApiService {
     }
   }
 
-  async submitForm(formId: string, data: Record<string, any>): Promise<void> {
+  async submitForm(formId: string, data: Record<string, unknown>): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/forms`, {
       method: 'POST',
       headers: {
@@ -228,7 +228,7 @@ class ApiService {
     }
   }
 
-  async sendEmail(data: Record<string, any>): Promise<void> {
+  async sendEmail(data: Record<string, unknown>): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/email`, {
       method: 'POST',
       headers: {

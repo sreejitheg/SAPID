@@ -45,7 +45,7 @@ export interface FormField {
   required?: boolean;
   options?: string[];
   placeholder?: string;
-  value?: any;
+  value?: string | number | boolean | string[];
 }
 
 export interface DynamicForm {
@@ -54,8 +54,14 @@ export interface DynamicForm {
   description?: string;
   fields: FormField[];
   submitLabel?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
+
+export type StreamChunk =
+  | { type: 'content'; content: string }
+  | { type: 'document_reference'; document_id: string }
+  | { type: 'form'; form_data: DynamicForm }
+  | { type: 'done' };
 
 export interface AppSettings {
   webSearchEnabled: boolean;

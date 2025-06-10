@@ -1,4 +1,4 @@
-import { Document, Message, Conversation, DynamicForm } from '../types';
+import { Document, Message, Conversation, Session, StreamChunk } from '../types';
 import { demoConversations, demoDocuments, demoMessages, demoPurchaseForm } from './demoData';
 import { apiService } from '../api/apiService';
 
@@ -11,10 +11,10 @@ class DemoService {
     return true;
   }
 
-  async createSession(): Promise<any> {
+  async createSession(): Promise<Session> {
     return {
       id: 'demo-session-' + Date.now(),
-      created_at: new Date().toISOString(),
+      createdAt: new Date(),
     };
   }
 
@@ -44,12 +44,12 @@ class DemoService {
     delete this.messages[conversationId];
     
     // Remove temporary documents associated with this conversation
-    this.documents = this.documents.filter(doc => 
-      doc.type === 'permanent' || !this.isDocumentAssociatedWithConversation(doc.id, conversationId)
+    this.documents = this.documents.filter(
+      doc => doc.type === 'permanent' || !this.isDocumentAssociatedWithConversation()
     );
   }
 
-  private isDocumentAssociatedWithConversation(docId: string, conversationId: string): boolean {
+  private isDocumentAssociatedWithConversation(): boolean {
     // In a real implementation, this would check document-conversation associations
     // For demo, we'll assume temporary docs are associated with recent conversations
     return true;
@@ -86,7 +86,9 @@ class DemoService {
     this.documents = this.documents.filter(doc => doc.id !== docId);
   }
 
-  async *streamChat(message: string, conversationId: string, webSearchEnabled: boolean): AsyncGenerator<any, void, unknown> {
+  async *streamChat(message: string, conversationId: string, webSearchEnabled: boolean): AsyncGenerator<StreamChunk, void, unknown> {
+    void conversationId;
+    void webSearchEnabled;
     // Simulate different types of responses based on message content
     if (message.toLowerCase().includes('form') || message.toLowerCase().includes('purchase')) {
       yield { type: 'content', content: 'I\'ll help you create a purchase request form. ' };
@@ -126,13 +128,13 @@ class DemoService {
     yield { type: 'done' };
   }
 
-  async submitForm(formId: string, data: Record<string, any>): Promise<void> {
+  async submitForm(formId: string, data: Record<string, unknown>): Promise<void> {
     console.log('Demo form submission:', { formId, data });
     // Simulate form processing
     await this.delay(1000);
   }
 
-  async sendEmail(data: Record<string, any>): Promise<void> {
+  async sendEmail(data: Record<string, unknown>): Promise<void> {
     console.log('Demo email send:', data);
     await this.delay(500);
   }

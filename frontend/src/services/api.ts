@@ -1,4 +1,4 @@
-import { Document, Message, DynamicForm, Session } from '../types';
+import { Document, Session, StreamChunk } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -130,11 +130,11 @@ class ApiService {
             if (data === '[DONE]') return;
             
             try {
-              const parsed = JSON.parse(data);
+              const parsed = JSON.parse(data) as StreamChunk;
               if (parsed.content) {
                 yield parsed.content;
               }
-            } catch (e) {
+            } catch {
               // Skip invalid JSON
             }
           }
@@ -145,7 +145,7 @@ class ApiService {
     }
   }
 
-  async submitForm(formId: string, data: Record<string, any>): Promise<void> {
+  async submitForm(formId: string, data: Record<string, unknown>): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/forms`, {
       method: 'POST',
       headers: {
@@ -163,7 +163,7 @@ class ApiService {
     }
   }
 
-  async sendEmail(data: Record<string, any>): Promise<void> {
+  async sendEmail(data: Record<string, unknown>): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/email`, {
       method: 'POST',
       headers: {
@@ -180,7 +180,7 @@ class ApiService {
     }
   }
 
-  async getDemoData(): Promise<any> {
+  async getDemoData(): Promise<unknown> {
     const response = await fetch(`${API_BASE_URL}/demo`);
     
     if (!response.ok) {
