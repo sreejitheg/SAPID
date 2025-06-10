@@ -1,0 +1,56 @@
+name: Deploy & GPU Test
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1) Add SSH key
+      - name: Add SSH key
+        id: ssh
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.TARGET_SSH_KEY }}
+
+      # 2) Sync repo to server (~/sapid)
+      - name: Sync code to server
+        run: |
+          rsync -az --delete -e "ssh -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.TARGET_USER }}@${{ secrets.TARGET_HOST }}:~/sapid/
+
+      # 3) Remote build + up (GPU)
+      - name: Docker compose up
+        run: |
+          ssh ${{ secrets.TARGET_USER }}@${{ secrets.TARGET_HOST }} <<'EOF'
+            cd ~/sapid
+            docker compose pull
+            docker compose up -d --build
+          EOF
+
+      # 4) Wait for backend health
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            if ssh ${{ secrets.TARGET_USER }}@${{ secrets.TARGET_HOST }} \
+              "curl -fs http://localhost:8001/health" ; then echo OK && exit 0; fi
+            sleep 5
+          done
+          exit 1
+
+      # 5) Run smoke tests (inside backend container)
+      - name: Run pytest
+        run: |
+          ssh ${{ secrets.TARGET_USER }}@${{ secrets.TARGET_HOST }} \
+            "cd ~/sapid && docker compose exec backend pytest -q"
+
+      # 6) Collect logs if tests fail
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          ssh ${{ secrets.TARGET_USER }}@${{ secrets.TARGET_HOST }} \
+            "cd ~/sapid && docker compose logs --tail=200"
