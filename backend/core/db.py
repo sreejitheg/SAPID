@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Iterator, Optional
 
 
-from sqlmodel import Field, SQLModel, Session, create_engine, delete
+from sqlmodel import Field, SQLModel, Session, create_engine, delete, select
 
 
 DATABASE_URL = os.getenv("POSTGRES_URL", "sqlite:///./local.db")
@@ -22,11 +22,21 @@ class ChatSession(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 
-class Message(SQLModel, table=True):
-    __tablename__ = "message"
+
+class Conversation(SQLModel, table=True):
+    __tablename__ = "conversation"
 
     id: Optional[int] = Field(default=None, primary_key=True)
     session_id: int = Field(foreign_key="chat_session.id")
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+
+
+class ChatMessage(SQLModel, table=True):
+    __tablename__ = "chat_message"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    conversation_id: int = Field(foreign_key="conversation.id")
+
     sender: str
     content: str
     llm_intent: Optional[str] = None
@@ -68,23 +78,67 @@ def create_session() -> ChatSession:
 def delete_session(session_id: int) -> None:
     """Delete a chat session and its messages."""
     with get_session() as session:
-        session.exec(delete(Message).where(Message.session_id == session_id))
+
+        conv_ids = [c.id for c in session.exec(select(Conversation.id).where(Conversation.session_id == session_id))]
+        if conv_ids:
+            session.exec(delete(ChatMessage).where(ChatMessage.conversation_id.in_(conv_ids)))
+            session.exec(delete(Conversation).where(Conversation.id.in_(conv_ids)))
+
         session.exec(delete(ChatSession).where(ChatSession.id == session_id))
         session.commit()
 
 
 
+def create_conversation(session_id: int) -> Conversation:
+    """Create a new conversation for a session."""
+    with get_session() as session:
+        conv = Conversation(session_id=session_id)
+        session.add(conv)
+        session.commit()
+        session.refresh(conv)
+        return conv
+
+
+def list_conversations(session_id: Optional[int] = None) -> list[Conversation]:
+    with get_session() as session:
+        stmt = select(Conversation)
+        if session_id is not None:
+            stmt = stmt.where(Conversation.session_id == session_id)
+        return session.exec(stmt).all()
+
+
+def delete_conversation(conversation_id: int) -> None:
+    with get_session() as session:
+        session.exec(delete(ChatMessage).where(ChatMessage.conversation_id == conversation_id))
+        session.exec(delete(Conversation).where(Conversation.id == conversation_id))
+        session.commit()
+
+
+def get_conversation(conversation_id: int) -> Conversation | None:
+    with get_session() as session:
+        return session.get(Conversation, conversation_id)
+
+
+def get_messages(conversation_id: int) -> list[ChatMessage]:
+    with get_session() as session:
+        stmt = select(ChatMessage).where(ChatMessage.conversation_id == conversation_id)
+        return session.exec(stmt).all()
+
+
 def add_message(
-    session_id: int,
+    conversation_id: int,
+
     sender: str,
     content: str,
     llm_intent: Optional[str] = None,
     confidence: Optional[float] = None,
-) -> Message:
+
+) -> ChatMessage:
     """Persist a chat message."""
     with get_session() as session:
-        msg = Message(
-            session_id=session_id,
+        msg = ChatMessage(
+            conversation_id=conversation_id,
+
             sender=sender,
             content=content,
             llm_intent=llm_intent,

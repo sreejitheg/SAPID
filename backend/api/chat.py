@@ -21,6 +21,9 @@ router = APIRouter()
 
 class ChatIn(BaseModel):
     session_id: int | None = None
+
+    conversation_id: int | None = None
+
     user: str
     message: str
 
@@ -36,6 +39,13 @@ def render_sources(sources: list[dict]) -> str:
 @router.post("/")
 async def chat_endpoint(payload: ChatIn) -> dict:
     session = db.get_or_create_session(payload.session_id)
+
+    conversation = None
+    if payload.conversation_id is not None:
+        conversation = db.get_conversation(payload.conversation_id)
+    if conversation is None:
+        conversation = db.create_conversation(session.id)
+
     intent, conf = llm.classify_intent(payload.message)
     rag_ans, sources = rag.query(payload.message, f"temp_{session.id}", 5)
     if intent in {"incident_report", "maintenance_query"} and conf > 0.6:
@@ -44,7 +54,9 @@ async def chat_endpoint(payload: ChatIn) -> dict:
     if sources:
         full_answer += "\n" + render_sources(sources)
     db.add_message(
-        session_id=session.id,
+
+        conversation_id=conversation.id,
+
         sender=payload.user,
         content=payload.message,
         llm_intent=intent,

@@ -49,8 +49,9 @@ async def test_chat_flow(tmp_path, monkeypatch):
     import backend.external.incident_api as incident_mod
     monkeypatch.setattr(incident_mod.IncidentAPI, 'collect', lambda self, *a, **kw: collect_calls.append(a))
 
-
     session = db.get_or_create_session(None)
+    conv = db.create_conversation(session.id)
+
 
     pdf_path = 'frontend/public/demo/financial-report.pdf'
 
@@ -60,7 +61,13 @@ async def test_chat_flow(tmp_path, monkeypatch):
         with open(pdf_path, 'rb') as fh:
             resp = await client.post(f'/upload/temp/{session.id}', files={'file': ('test.pdf', fh, 'application/pdf')})
             assert resp.status_code == 200
-        payload = {'session_id': session.id, 'user': 'alice', 'message': 'hello'}
+        payload = {
+            'session_id': session.id,
+            'conversation_id': conv.id,
+            'user': 'alice',
+            'message': 'hello'
+        }
+
         resp = await client.post('/chat/', json=payload)
         assert resp.status_code == 200
         data = resp.json()
@@ -68,6 +75,8 @@ async def test_chat_flow(tmp_path, monkeypatch):
     assert '(#/pdf/' in data['answer']
 
     with db.get_session() as s:
-        msgs = s.exec(select(db.Message)).all()
+
+        msgs = s.exec(select(db.ChatMessage)).all()
+
         assert len(msgs) == 1
         assert msgs[0].content == 'hello'
