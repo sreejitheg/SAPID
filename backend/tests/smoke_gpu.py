@@ -1,6 +1,9 @@
 from io import BytesIO
 
 import requests
+
+import json
+
 from pypdf import PdfWriter
 from sqlmodel import select
 
@@ -38,14 +41,18 @@ def test_smoke_gpu():
     conv_id = conv_resp.json()["id"]
     payload["conversation_id"] = conv_id
 
-    resp = requests.post("http://localhost:8001/chat/", json=payload)
+    resp = requests.post("http://localhost:8001/chat/", json=payload, stream=True)
     assert resp.status_code == 200
-    data = resp.json()
-    assert "(#/pdf/" in data.get("answer", "")
-    assert data.get("intent") in {"general", "document_query"}
+    events = []
+    for line in resp.iter_lines():
+        if line.startswith(b"data:"):
+            events.append(json.loads(line[5:].decode().strip()))
+    answer = "".join(
+        e.get("content", "") for e in events if e.get("type") == "content"
+    )
+    assert "(#/pdf/" in answer
 
     with db.get_session() as session:
-
         msgs = session.exec(select(db.ChatMessage)).all()
 
         assert len(msgs) >= 1

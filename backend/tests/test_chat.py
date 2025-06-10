@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 import sys
 from httpx import AsyncClient, ASGITransport
+import json
+
 from sqlmodel import select
 import pytest
 
@@ -68,14 +70,18 @@ async def test_chat_flow(tmp_path, monkeypatch):
             'message': 'hello'
         }
 
-        resp = await client.post('/chat/', json=payload)
-        assert resp.status_code == 200
-        data = resp.json()
+        async with client.stream("POST", "/chat/", json=payload) as resp:
+            assert resp.status_code == 200
+            events = []
+            async for line in resp.aiter_lines():
+                if line.startswith("data:"):
+                    events.append(json.loads(line[5:].strip()))
 
-    assert '(#/pdf/' in data['answer']
+            answer = "".join(e["content"] for e in events if e.get("type") == "content")
+
+    assert '(#/pdf/' in answer
 
     with db.get_session() as s:
-
         msgs = s.exec(select(db.ChatMessage)).all()
 
         assert len(msgs) == 1

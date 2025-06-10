@@ -1,5 +1,9 @@
 import os
 from fastapi import APIRouter
+
+from fastapi.responses import EventSourceResponse
+import json
+
 from pydantic import BaseModel
 
 from ..core.llm import LLM
@@ -37,7 +41,8 @@ def render_sources(sources: list[dict]) -> str:
 
 
 @router.post("/")
-async def chat_endpoint(payload: ChatIn) -> dict:
+
+async def chat_endpoint(payload: ChatIn) -> EventSourceResponse:
     session = db.get_or_create_session(payload.session_id)
 
     conversation = None
@@ -53,8 +58,9 @@ async def chat_endpoint(payload: ChatIn) -> dict:
     full_answer = rag_ans
     if sources:
         full_answer += "\n" + render_sources(sources)
-    db.add_message(
 
+
+    db.add_message(
         conversation_id=conversation.id,
 
         sender=payload.user,
@@ -62,4 +68,11 @@ async def chat_endpoint(payload: ChatIn) -> dict:
         llm_intent=intent,
         confidence=conf,
     )
-    return {"answer": full_answer, "intent": intent, "sources": sources}
+
+
+    async def event_generator():
+        yield json.dumps({"type": "content", "content": full_answer})
+        yield json.dumps({"type": "done"})
+
+    return EventSourceResponse(event_generator())
+
