@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import os
@@ -25,15 +26,19 @@ class RAG:
     def _collection(self, name: str):
         return self.client.get_or_create_collection(name)
 
+
     def embed_pdf(
         self, path: str, collection_name: str, is_temp: bool, doc_id: str | None = None
     ) -> None:
+
         """Embed the given PDF into the specified Chroma collection."""
 
         reader = PdfReader(path)
         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         collection = self._collection(collection_name)
+
         doc_identifier = doc_id or os.path.basename(path)
+
 
         for page_number, page in enumerate(reader.pages):
             text = page.extract_text() or ""
@@ -41,7 +46,9 @@ class RAG:
             for chunk_id, chunk in enumerate(chunks):
                 embedding = self.llm.embed(chunk)
                 metadata = {
+
                     "doc_id": doc_identifier,
+
                     "page": page_number,
                     "chunk_id": chunk_id,
                     "text": chunk,
@@ -89,3 +96,4 @@ class RAG:
         ]
         answer = self.llm.chat(messages)
         return answer, sources
+
