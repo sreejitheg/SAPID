@@ -1,0 +1,2 @@
+FROM ghcr.io/coqui-ai/tts:latest
+CMD ["tts_server"]
