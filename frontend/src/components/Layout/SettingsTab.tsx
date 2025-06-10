@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Moon, Sun, Globe, TestTube, Activity, WifiOff, RefreshCw, Shield, User } from 'lucide-react';
 import { AppSettings } from '../../types';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 interface SettingsTabProps {
   settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
@@ -13,7 +15,7 @@ export function SettingsTab({ settings, onSettingsChange }: SettingsTabProps) {
   const checkBackendHealth = async () => {
     setIsCheckingHealth(true);
     try {
-      const response = await fetch('http://localhost:8000/health');
+      const response = await fetch(`${API_BASE_URL}/health`);
       const healthy = response.ok;
       onSettingsChange({ ...settings, backendHealthy: healthy });
     } catch (error) {
@@ -173,7 +175,7 @@ export function SettingsTab({ settings, onSettingsChange }: SettingsTabProps) {
                   {settings.demoMode 
                     ? 'Demo mode active' 
                     : settings.backendHealthy 
-                      ? 'Connected to localhost:8000' 
+                      ? 'Connected'
                       : 'Backend unavailable'
                   }
                 </p>
@@ -210,7 +212,7 @@ export function SettingsTab({ settings, onSettingsChange }: SettingsTabProps) {
           </div>
           <div className="flex justify-between">
             <span>API Endpoint:</span>
-            <span>{settings.demoMode ? 'Mock Service' : 'localhost:8000'}</span>
+            <span>{settings.demoMode ? 'Mock Service' : API_BASE_URL}</span>
           </div>
         </div>
       </div>

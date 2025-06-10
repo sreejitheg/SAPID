@@ -4,7 +4,7 @@ This document defines the complete API specification for SAPID backend integrati
 
 ## Base URL
 ```
-http://localhost:8000
+/api
 ```
 
 ## Authentication
