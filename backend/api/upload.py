@@ -1,11 +1,13 @@
 import os
 import tempfile
 
+
 from fastapi import APIRouter, UploadFile, HTTPException, Response
 
 from ..core.llm import LLM
 from ..core.rag import RAG
 from ..core import db
+
 
 ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
 chat_model = os.getenv("OLLAMA_CHAT_MODEL", "llama3")
@@ -15,6 +17,7 @@ chroma_url = os.getenv("CHROMA_URL", "http://localhost:8000")
 rag = RAG(LLM(ollama_url, chat_model, embed_model), chroma_url)
 
 router = APIRouter()
+
 
 @router.post("/")
 async def upload(file: UploadFile, type: str, session_id: int | None = None) -> dict:
@@ -59,6 +62,7 @@ async def upload_temp(session_id: int, file: UploadFile) -> dict:
     return {"status": "ok", "collection": collection}
 
 
+
 @router.get("/documents")
 def list_docs(session_id: int | None = None) -> list[dict]:
     docs = db.list_documents(session_id)
@@ -94,3 +98,4 @@ def get_doc(doc_id: int):
 def delete_doc(doc_id: int) -> Response:
     db.delete_document(doc_id)
     return Response(status_code=204)
+

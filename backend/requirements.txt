@@ -8,7 +8,9 @@ pypdf
 chromadb
 langchain
 httpx
+
 pytest
 pytest-asyncio
 sse-starlette
 python-multipart
+
