@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlmodel
+alembic
+psycopg2-binary
+requests
+pypdf
+chromadb
+langchain
+httpx
+pytest
+pytest-asyncio
+sse-starlette
+python-multipart
