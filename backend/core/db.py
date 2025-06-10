@@ -66,6 +66,7 @@ class FormSubmission(SQLModel, table=True):
     data: str
     submitted_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
+
 @contextmanager
 def get_session() -> Iterator[Session]:
     with Session(engine) as session:
