@@ -54,12 +54,12 @@ Cleans up session and associated temporary documents.
   "type": "permanent",
   "size": 1024000,
   "uploaded_at": "2024-01-20T10:00:00Z",
-  "url": "/documents/doc_uuid/view"
+  "url": "/upload/documents/doc_uuid/view"
 }
 ```
 
 ### Get Documents
-**GET** `/documents?session_id={session_id}`
+**GET** `/upload/documents?session_id={session_id}`
 
 Returns all documents for the session.
 
@@ -72,18 +72,18 @@ Returns all documents for the session.
     "type": "permanent",
     "size": 1024000,
     "uploaded_at": "2024-01-20T10:00:00Z",
-    "url": "/documents/doc_uuid/view"
+    "url": "/upload/documents/doc_uuid/view"
   }
 ]
 ```
 
 ### Get Document
-**GET** `/documents/{doc_id}`
+**GET** `/upload/documents/{doc_id}`
 
 Returns document metadata and content URL.
 
 ### Delete Document
-**DELETE** `/documents/{doc_id}`
+**DELETE** `/upload/documents/{doc_id}`
 
 Deletes the specified document.
 
