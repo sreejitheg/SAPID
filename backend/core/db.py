@@ -44,6 +44,18 @@ class ChatMessage(SQLModel, table=True):
     timestamp: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 
+
+class Document(SQLModel, table=True):
+    __tablename__ = "document"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    type: str
+    size: int
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    session_id: Optional[int] = Field(default=None, foreign_key="chat_session.id")
+
+
 @contextmanager
 def get_session() -> Iterator[Session]:
     with Session(engine) as session:
@@ -148,4 +160,33 @@ def add_message(
         session.commit()
         session.refresh(msg)
         return msg
+
+
+
+def add_document(name: str, type: str, size: int, session_id: Optional[int]) -> Document:
+    with get_session() as session:
+        doc = Document(name=name, type=type, size=size, session_id=session_id)
+        session.add(doc)
+        session.commit()
+        session.refresh(doc)
+        return doc
+
+
+def list_documents(session_id: Optional[int] = None) -> list[Document]:
+    with get_session() as session:
+        stmt = select(Document)
+        if session_id is not None:
+            stmt = stmt.where(Document.session_id == session_id)
+        return session.exec(stmt).all()
+
+
+def get_document(doc_id: int) -> Document | None:
+    with get_session() as session:
+        return session.get(Document, doc_id)
+
+
+def delete_document(doc_id: int) -> None:
+    with get_session() as session:
+        session.exec(delete(Document).where(Document.id == doc_id))
+        session.commit()
 
