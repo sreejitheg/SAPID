@@ -13,7 +13,11 @@ export interface ChatResponse {
 
 const BASE = import.meta.env.VITE_API_BASE || '/api';
 
-export function chat(sessionId: string, text: string, onMessage: (data: any) => void): Promise<void> {
+export function chat(
+  sessionId: string,
+  text: string,
+  onMessage: (data: unknown) => void,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const es = new EventSource(`${BASE}/chat?session_id=${sessionId}&message=${encodeURIComponent(text)}&user=user`);
     es.onmessage = (event) => {
