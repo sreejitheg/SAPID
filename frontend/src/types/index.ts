@@ -28,7 +28,7 @@ export interface Document {
 
 export interface Conversation {
   id: string;
-  title: string;
+  title?: string;
   createdAt: Date;
   lastMessage?: string;
 }

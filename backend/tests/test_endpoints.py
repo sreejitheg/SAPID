@@ -51,9 +51,13 @@ async def test_endpoints(tmp_path, monkeypatch):
         session_id = sess.json()['id']
 
         # create conversation
-        conv = await client.post('/conversations/', json={'session_id': session_id})
+        conv = await client.post(
+            '/conversations/', json={'session_id': session_id, 'title': 'Test'}
+        )
         assert conv.status_code == 200
-        conv_id = conv.json()['id']
+        conv_body = conv.json()
+        assert conv_body['title'] == 'Test'
+        conv_id = conv_body['id']
 
         # upload via generic endpoint
         pdf_path = 'frontend/public/demo/financial-report.pdf'

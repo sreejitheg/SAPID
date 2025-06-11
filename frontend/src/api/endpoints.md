@@ -96,7 +96,7 @@ Deletes the specified document.
 ### Create Conversation
 **POST** `/conversations`
 
-**Body:**
+**Body:** (`title` optional)
 ```json
 {
   "session_id": "session_uuid",

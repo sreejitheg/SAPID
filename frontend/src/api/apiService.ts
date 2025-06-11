@@ -41,7 +41,7 @@ class ApiService {
     this.sessionId = null;
   }
 
-  async createConversation(title: string): Promise<Conversation> {
+  async createConversation(title?: string): Promise<Conversation> {
     if (!this.sessionId) {
       throw new Error('No active session');
     }
