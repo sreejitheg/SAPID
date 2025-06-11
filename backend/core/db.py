@@ -28,6 +28,7 @@ class Conversation(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     session_id: int = Field(foreign_key="chat_session.id")
+    title: Optional[str] = Field(default=None, nullable=True)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 
@@ -112,10 +113,10 @@ def delete_session(session_id: int) -> None:
 
 
 
-def create_conversation(session_id: int) -> Conversation:
+def create_conversation(session_id: int, title: Optional[str] = None) -> Conversation:
     """Create a new conversation for a session."""
     with get_session() as session:
-        conv = Conversation(session_id=session_id)
+        conv = Conversation(session_id=session_id, title=title)
         session.add(conv)
         session.commit()
         session.refresh(conv)

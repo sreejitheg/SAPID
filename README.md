@@ -31,7 +31,7 @@ model on first run if it's not already installed.
 - `DELETE /upload/documents/{doc_id}` – Remove a document
 - `POST /sessions/` – Create a chat session
 - `DELETE /sessions/{session_id}` – Delete a session
-- `POST /conversations/` – Create a conversation
+- `POST /conversations/` – Create a conversation (optional `title`)
 - `GET /conversations` – List conversations (`session_id` optional)
 - `DELETE /conversations/{conversation_id}` – Delete a conversation
 - `GET /conversations/{conversation_id}/messages` – Conversation history

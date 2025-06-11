@@ -8,19 +8,30 @@ router = APIRouter()
 
 class ConversationIn(BaseModel):
     session_id: int
+    title: str | None = None
 
 
 @router.post("/")
 def create_conversation(payload: ConversationIn) -> dict:
-    conv = db.create_conversation(payload.session_id)
-    return {"id": conv.id, "session_id": conv.session_id, "created_at": conv.created_at}
+    conv = db.create_conversation(payload.session_id, title=payload.title)
+    return {
+        "id": conv.id,
+        "session_id": conv.session_id,
+        "title": conv.title,
+        "created_at": conv.created_at,
+    }
 
 
 @router.get("/")
 def list_conversations(session_id: int | None = None) -> list[dict]:
     conversations = db.list_conversations(session_id)
     return [
-        {"id": c.id, "session_id": c.session_id, "created_at": c.created_at}
+        {
+            "id": c.id,
+            "session_id": c.session_id,
+            "title": c.title,
+            "created_at": c.created_at,
+        }
         for c in conversations
     ]
 

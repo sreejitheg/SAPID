@@ -22,7 +22,7 @@ class DemoService {
     // Demo cleanup
   }
 
-  async createConversation(title: string): Promise<Conversation> {
+  async createConversation(title?: string): Promise<Conversation> {
     const newConv: Conversation = {
       id: 'conv-' + Date.now(),
       title,
